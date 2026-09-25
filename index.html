@@ -2,9 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
+    <!-- =====================================================
+         🔧 EDITABLE INFORMATION — CHANGE ONLY FROM HERE
+         Every value below is used throughout the file via CONFIG.xxx
+         Change a value here and it updates everywhere it's used.
+         ===================================================== -->
+    <script>
+    window.CONFIG = {
+        // APP
+        appName: "Premium User Dashboard",
+        faviconUrl: "https://i.ibb.co/F46TgHLt/IMG-20251101-010328-873.jpg",
+        currency: "₹",
+
+        // FIREBASE (Realtime Database + Auth project credentials)
+        firebase: {
+            apiKey: "AIzaSyDrjP8o8adBYGih_28XrDrCwVpL3WRu9rE",
+            authDomain: "selll-d5149.firebaseapp.com",
+            databaseURL: "https://selll-d5149-default-rtdb.firebaseio.com",
+            projectId: "selll-d5149",
+            storageBucket: "selll-d5149.firebasestorage.app",
+            messagingSenderId: "633734276998",
+            appId: "1:633734276998:web:b486015bd345028a406e07"
+        },
+
+        // PAYMENT — UPI
+        upiId: "Paytmqr6i3w0w@ptys",
+        upiPayeeName: "SACHIN SAYSING RAUT",
+        qrCodeApiBase: "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=",
+
+        // PAYMENT — UTR VERIFICATION ENGINES (advanced — only change if switching provider)
+        merchantId: "MdXwlu49903940058924",
+        verifyEngineAUrl: "https://verify.pikaapis.workers.dev/",
+        verifyEngineBUrl: "https://paytm.anujbots.xyz/verify.php",
+
+        // PAYMENT — CRYPTO GATEWAY (advanced — only change if switching provider)
+        heleketWorkerUrl: "https://winter-art-2266heleket-api.demos-orx.workers.dev",
+
+        // WORKER / CORS PROXY ENDPOINTS (advanced — only change if a proxy stops working)
+        verifyProxyWorkerUrl: "https://bitter-mode-4fa8wholesale-proxy.demos-orx.workers.dev/?url=",
+        corsProxy1: "https://corsproxy.org/?",
+        corsProxy2: "https://proxy.cors.sh/",
+        corsProxy3: "https://thingproxy.freeboard.io/fetch/",
+
+        // TELEGRAM (advanced — these are Telegram's own fixed API/link domains)
+        telegramApiBase: "https://api.telegram.org/bot",
+        telegramLinkBase: "https://t.me/"
+    };
+    document.title = window.CONFIG.appName;
+    </script>
+    <!-- =====================================================
+         🔧 END OF EDITABLE INFORMATION
+         ===================================================== -->
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Premium User Dashboard</title>
-    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/F46TgHLt/IMG-20251101-010328-873.jpg">
+    <link rel="icon" id="faviconLink" type="image/jpeg" href="https://i.ibb.co/F46TgHLt/IMG-20251101-010328-873.jpg">
+    <script>document.getElementById('faviconLink').href = CONFIG.faviconUrl;</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -2881,15 +2935,7 @@
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, linkWithCredential, EmailAuthProvider, fetchSignInMethodsForEmail, sendPasswordResetEmail, sendEmailVerification, signInAnonymously } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
     import { getDatabase, ref, get, set, push, onValue, query, orderByChild, equalTo, update, onChildChanged, runTransaction, remove, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDrjP8o8adBYGih_28XrDrCwVpL3WRu9rE",
-        authDomain: "selll-d5149.firebaseapp.com",
-        databaseURL: "https://selll-d5149-default-rtdb.firebaseio.com",
-        projectId: "selll-d5149",
-        storageBucket: "selll-d5149.firebasestorage.app",
-        messagingSenderId: "633734276998",
-        appId: "1:633734276998:web:b486015bd345028a406e07"
-    };
+    const firebaseConfig = CONFIG.firebase;
     const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getDatabase(app);
 
     // ── Dedicated, isolated Auth instance for Guest (anonymous) sessions ──
@@ -3089,7 +3135,7 @@
         const enc = encodeURIComponent(verifyUrl);
         return [
             { url: verifyUrl,                                                                    opts: {} },
-            { url: `https://bitter-mode-4fa8wholesale-proxy.demos-orx.workers.dev/?url=${enc}`,    opts: {} },
+            { url: `${CONFIG.verifyProxyWorkerUrl}${enc}`,    opts: {} },
         ];
     };
 
@@ -3100,7 +3146,7 @@
     function prewarmProxies(verifyUrl) {
         const enc = encodeURIComponent(verifyUrl);
         [
-            `https://bitter-mode-4fa8wholesale-proxy.demos-orx.workers.dev/?url=${enc}`,
+            `${CONFIG.verifyProxyWorkerUrl}${enc}`,
         ].forEach(url => {
             fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(5000) }).catch(() => {});
         });
@@ -3118,15 +3164,15 @@
     // own. Only when BOTH engines have failed/timed out does the
     // controller resolve null (→ caller shows PAYMENT NOT VERIFIED).
     // ═══════════════════════════════════════════════════════════════════
-    const DUAL_MERCHANT_ID = "MdXwlu49903940058924";
+    const DUAL_MERCHANT_ID = CONFIG.merchantId;
 
     // Engine A URL builder (unchanged from original payment_gateway.html)
     function buildEngineAVerifyUrl(utr) {
-        return `https://verify.pikaapis.workers.dev/?trn=${utr}&id=${DUAL_MERCHANT_ID}`;
+        return `${CONFIG.verifyEngineAUrl}?trn=${utr}&id=${DUAL_MERCHANT_ID}`;
     }
     // Engine B URL builder (unchanged from this file — new_payment_gateway.html)
     function buildEngineBVerifyUrl(utr) {
-        return `https://paytm.anujbots.xyz/verify.php?orderid=${utr}&merchantid=${DUAL_MERCHANT_ID}&merchantkey=${DUAL_MERCHANT_ID}`;
+        return `${CONFIG.verifyEngineBUrl}?orderid=${utr}&merchantid=${DUAL_MERCHANT_ID}&merchantkey=${DUAL_MERCHANT_ID}`;
     }
 
     // Engine A's own success/shape validator + normalizer (unchanged rules:
@@ -3286,11 +3332,11 @@
             const apiURLs = [
                 { url: apiUrl,
                   opts: { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: apiPayload } },
-                { url: `https://corsproxy.org/?${encodeURIComponent(apiUrl)}`,
+                { url: `${CONFIG.corsProxy1}${encodeURIComponent(apiUrl)}`,
                   opts: { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: apiPayload } },
-                { url: `https://proxy.cors.sh/${apiUrl}`,
+                { url: `${CONFIG.corsProxy2}${apiUrl}`,
                   opts: { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','x-cors-api-key':'temp_'}, body: apiPayload } },
-                { url: `https://thingproxy.freeboard.io/fetch/${apiUrl}`,
+                { url: `${CONFIG.corsProxy3}${apiUrl}`,
                   opts: { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: apiPayload } },
             ];
 
@@ -3640,13 +3686,13 @@
         } else if(data.flow === 'wf') {
             wfAmount = parseFloat(data.amount) || 0;
             wfOrderId = data.orderId;
-            const upiId = "Paytmqr6i3w0w@ptys";
+            const upiId = CONFIG.upiId;
             const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
             setTxt('wfPayAmt', `₹${wfAmount.toFixed(2)}`);
             setTxt('wfOrderIdDisplay', wfOrderId);
-            const upiStr = `upi://pay?pa=${upiId}&pn=${encodeURIComponent("SACHIN SAYSING RAUT")}&am=${wfAmount}&cu=INR&tr=${wfOrderId}`;
+            const upiStr = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(CONFIG.upiPayeeName)}&am=${wfAmount}&cu=INR&tr=${wfOrderId}`;
             const qrEl = document.getElementById('wf-dynamic-qr');
-            if(qrEl) qrEl.src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(upiStr);
+            if(qrEl) qrEl.src = CONFIG.qrCodeApiBase + encodeURIComponent(upiStr);
             document.getElementById('walletFundModal').classList.add('active');
             document.getElementById('afStep1').style.display = 'none';
             document.getElementById('wfStep2').style.display = 'flex';
@@ -3662,13 +3708,13 @@
             cartCouponDiscount = parseFloat(data.couponDiscount) || 0;
             updateCartBadge();
 
-            const upiId = "Paytmqr6i3w0w@ptys";
+            const upiId = CONFIG.upiId;
             const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
             setTxt('cartPayAmt', `₹${cartFinalAmt.toFixed(2)}`);
             setTxt('cartOrderIdDisplay', cartOrderId);
-            const upiStr = `upi://pay?pa=${upiId}&pn=${encodeURIComponent("SACHIN SAYSING RAUT")}&am=${cartFinalAmt}&cu=INR&tr=${cartOrderId}`;
+            const upiStr = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(CONFIG.upiPayeeName)}&am=${cartFinalAmt}&cu=INR&tr=${cartOrderId}`;
             const qrEl = document.getElementById('cart-dynamic-qr');
-            if(qrEl) qrEl.src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(upiStr);
+            if(qrEl) qrEl.src = CONFIG.qrCodeApiBase + encodeURIComponent(upiStr);
             document.getElementById('cartModal').classList.add('active');
             document.getElementById('cartStep1').style.display = 'none';
             document.getElementById('cartStep2').style.display = 'block';
@@ -5357,7 +5403,7 @@
     };
 
     // ── CRYPTO (Heleket) GATEWAY ─────────────────────────────────────────
-    const HELEKET_WORKER = 'https://winter-art-2266heleket-api.demos-orx.workers.dev';
+    const HELEKET_WORKER = CONFIG.heleketWorkerUrl;
 
     let _cryptoOrderId  = '';
     let _cryptoInrAmt   = 0;
@@ -5942,7 +5988,7 @@
                     const { token, topUpChatId } = botSnap.val();
                     if (token && topUpChatId) {
                         const msg = `💳 <b>New PayPal Deposit Request!</b>\n\n➞ <b>User:</b> ${currentUser.displayName || currentUser.email || 'Guest'}\n💵 <b>Amount:</b> ₹${inr.toFixed(2)} (${conv.usd} USD / ${conv.eur} EUR)\n📝 <b>Transaction ID:</b> ${txnId}\n⏰ <b>Time:</b> ${new Date().toLocaleString('en-IN')}\n\n👉 Open Admin Panel → Deposit Requests to verify & approve.`;
-                        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        fetch(`${CONFIG.telegramApiBase}${token}/sendMessage`, {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ chat_id: topUpChatId, text: msg, parse_mode: 'HTML' })
                         }).catch(() => {});
@@ -6012,7 +6058,7 @@
                     const { token, topUpChatId } = botSnap.val();
                     if (token && topUpChatId) {
                         const msg = `💳 <b>New Binance Deposit Request!</b>\n\n➞ <b>User:</b> ${currentUser.displayName || currentUser.email || 'Guest'}\n💵 <b>Amount:</b> ₹${inr.toFixed(2)} (${usd} USDT)\n📝 <b>Order ID:</b> ${orderId}\n⏰ <b>Time:</b> ${new Date().toLocaleString('en-IN')}\n\n👉 Open Admin Panel → Deposit Requests to verify & approve.`;
-                        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        fetch(`${CONFIG.telegramApiBase}${token}/sendMessage`, {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ chat_id: topUpChatId, text: msg, parse_mode: 'HTML' })
                         }).catch(() => {});
@@ -6075,11 +6121,11 @@
         inp.classList.remove('input-error');
         inp.classList.add('input-success');
         wfOrderId = generateUTR(12);
-        const upiId = "Paytmqr6i3w0w@ptys";
+        const upiId = CONFIG.upiId;
         document.getElementById('wfPayAmt').textContent    = `₹${wfAmount.toFixed(2)}`;
         document.getElementById('wfOrderIdDisplay').textContent = wfOrderId;
-        const upiStr = `upi://pay?pa=${upiId}&pn=${encodeURIComponent("SACHIN SAYSING RAUT")}&am=${wfAmount}&cu=INR&tr=${wfOrderId}`;
-        document.getElementById('wf-dynamic-qr').src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(upiStr);
+        const upiStr = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(CONFIG.upiPayeeName)}&am=${wfAmount}&cu=INR&tr=${wfOrderId}`;
+        document.getElementById('wf-dynamic-qr').src = CONFIG.qrCodeApiBase + encodeURIComponent(upiStr);
         document.getElementById('afStep1').style.display = 'none';
         document.getElementById('wfStep2').style.display = 'flex';
         pgwSnapshotWf();
@@ -6162,7 +6208,7 @@
                     const {token, topUpChatId} = botSnap.val();
                     if(token && topUpChatId) {
                         const msg = `💳 <b>Wallet Top-Up!</b>\n\n➞ <b>User:</b> ${currentUser.displayName || currentUser.email || 'Guest'}\n💵 <b>Amount:</b> ₹${paidVal.toFixed(2)}\n📝 <b>UTR:</b> ${utr}\n⏰ <b>Time:</b> ${new Date().toLocaleString('en-IN')}`;
-                        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        fetch(`${CONFIG.telegramApiBase}${token}/sendMessage`, {
                             method:'POST', headers:{'Content-Type':'application/json'},
                             body: JSON.stringify({chat_id: topUpChatId, text: msg, parse_mode:'HTML'})
                         }).catch(()=>{});
@@ -6470,7 +6516,7 @@
                         const payload = `key=${encodeURIComponent(svcApiKey)}&action=add&service=${encodeURIComponent(svcId)}&link=${encodeURIComponent(reelLink)}&quantity=${encodeURIComponent(svcQty)}`;
                         const proxies = [
                             { url: svcApiUrl, method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: payload },
-                            { url: `https://corsproxy.org/?${encodeURIComponent(svcApiUrl)}`, method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: payload },
+                            { url: `${CONFIG.corsProxy1}${encodeURIComponent(svcApiUrl)}`, method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: payload },
                         ];
                         let apiJson = null;
                         for (const req of proxies) {
@@ -6799,7 +6845,7 @@
 
     function loadPublicData() { 
         onValue(ref(activeDb(), 'meta/brand'), s => { if(s.exists()){ const d = s.val(); document.getElementById('brandName').textContent = d.name || 'Store'; if(d.logoUrl) { document.getElementById('brandLogo').src = d.logoUrl; document.getElementById('brandLogo').style.display = 'block'; offerBrandLogoUrl = d.logoUrl; renderOfferCarousel(true); } } });
-        onValue(ref(activeDb(), 'meta/offers'), s => { if(s.exists()){ const d = s.val(); const tgHref = d.contactUsername ? (d.contactUsername.startsWith('http') ? d.contactUsername : `https://t.me/${d.contactUsername.replace('@','')}`) : '#'; document.getElementById('contactLink').href = tgHref; document.getElementById('updatesLink').href = d.channelLink || '#'; } });
+        onValue(ref(activeDb(), 'meta/offers'), s => { if(s.exists()){ const d = s.val(); const tgHref = d.contactUsername ? (d.contactUsername.startsWith('http') ? d.contactUsername : `${CONFIG.telegramLinkBase}${d.contactUsername.replace('@','')}`) : '#'; document.getElementById('contactLink').href = tgHref; document.getElementById('updatesLink').href = d.channelLink || '#'; } });
         onValue(ref(activeDb(), 'meta/offerSlides'), s => { offerSlidesRaw = s.exists() ? s.val() : {}; renderOfferCarousel(true); });
         onValue(ref(activeDb(), 'meta/contact'), s => { window._cachedContactMeta = s.exists() ? s.val() : null; if(s.exists() && s.val().socialTelegram){ if(document.getElementById('contactLink').getAttribute('href') === '#') { document.getElementById('contactLink').href = s.val().socialTelegram; } } });
         onValue(ref(activeDb(), 'meta/linkMgmt'), s => { linkMgmtRules = s.exists() ? s.val() : {}; });
@@ -7143,7 +7189,7 @@
             if(token&&supportChatId){
               const now=new Date().toLocaleString('en-IN');
               const tgMsg=`🎧 <b>New Support Message!</b>\n\n➞ <b>User:</b> ${displayName}\n⚙️ <b>Email:</b> ${currentUser.email}\n📥 <b>Message:</b> ${msg}\n⏰ <b>Time:</b> ${now}`;
-              fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:supportChatId,text:tgMsg,parse_mode:'HTML'})}).catch(()=>{});
+              fetch(`${CONFIG.telegramApiBase}${token}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:supportChatId,text:tgMsg,parse_mode:'HTML'})}).catch(()=>{});
             }
           }
         }catch(e){}})();
@@ -7215,13 +7261,13 @@
     if (_chkCommentsInputEl) _chkCommentsInputEl.addEventListener('input', updateCustomCommentsPrice);
 
     window.updateQRCode = (amount, orderId) => {
-        const upiId = "Paytmqr6i3w0w@ptys"; 
-        const upiName = "SACHIN SAYSING RAUT"; 
+        const upiId = CONFIG.upiId; 
+        const upiName = CONFIG.upiPayeeName; 
 
         const upiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tr=${orderId}`;
         const qrImg = document.getElementById('dynamic-qr');
 
-        if(qrImg) qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(upiString);
+        if(qrImg) qrImg.src = CONFIG.qrCodeApiBase + encodeURIComponent(upiString);
 
         document.getElementById('chkOrderIdDisplay').textContent = orderId;
     };
@@ -8109,11 +8155,11 @@
         }
 
         cartOrderId = generateUTR(12);
-        const upiId = "Paytmqr6i3w0w@ptys";
+        const upiId = CONFIG.upiId;
         document.getElementById('cartPayAmt').textContent = `₹${cartFinalAmt.toFixed(2)}`;
         document.getElementById('cartOrderIdDisplay').textContent = cartOrderId;
-        const upiStr = `upi://pay?pa=${upiId}&pn=${encodeURIComponent("SACHIN SAYSING RAUT")}&am=${cartFinalAmt}&cu=INR&tr=${cartOrderId}`;
-        document.getElementById('cart-dynamic-qr').src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(upiStr);
+        const upiStr = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(CONFIG.upiPayeeName)}&am=${cartFinalAmt}&cu=INR&tr=${cartOrderId}`;
+        document.getElementById('cart-dynamic-qr').src = CONFIG.qrCodeApiBase + encodeURIComponent(upiStr);
         document.getElementById('cartStep1').style.display = 'none';
         document.getElementById('cartStep2').style.display = 'block';
         pgwSnapshotCart();
@@ -8322,7 +8368,7 @@
                     text: tgMsg,
                     parse_mode: 'HTML'
                 };
-                fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                fetch(`${CONFIG.telegramApiBase}${token}/sendMessage`, {
                     method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
                 }).catch(()=>{});
             };
@@ -8548,7 +8594,7 @@
                 parse_mode: 'HTML'
             };
             if(inlineButtons) payload.reply_markup = { inline_keyboard: inlineButtons };
-            fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            fetch(`${CONFIG.telegramApiBase}${token}/sendMessage`, {
                 method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
             }).catch(()=>{});
         } catch(e) {}
